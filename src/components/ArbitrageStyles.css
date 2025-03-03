@@ -1,0 +1,622 @@
+/* Main container styles */
+.arbitrage-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #333;
+  background-color: #f9fafc;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header styles */
+.arbitrage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.arbitrage-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a2b4e;
+  margin: 0;
+}
+
+.account-info {
+  background-color: #f0f4f8;
+  padding: 1rem;
+  border-radius: 8px;
+  min-width: 250px;
+  border: 1px solid #e0e7ff;
+}
+
+.account-info p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Button styles */
+.connect-btn, .disconnect-btn, .action-button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.connect-btn {
+  background-color: #3a56e4;
+  color: white;
+}
+
+.connect-btn:hover {
+  background-color: #2a46d4;
+}
+
+.connect-btn.large {
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+}
+
+.disconnect-btn {
+  background-color: #f8f9fa;
+  color: #5a6474;
+  border: 1px solid #ddd;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.disconnect-btn:hover {
+  background-color: #f1f1f1;
+}
+
+/* Notification messages */
+.error-message, .success-message, .warning-message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.error-message {
+  background-color: #fff1f0;
+  color: #cf1322;
+  border: 1px solid #ffa39e;
+}
+
+.success-message {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.warning-message {
+  background-color: #fffbe6;
+  color: #d48806;
+  border: 1px solid #ffe58f;
+  margin-top: 0.5rem;
+}
+
+/* Tab navigation */
+.tab-navigation {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.tab-button {
+  padding: 0.8rem 1.5rem;
+  background: none;
+  border: none;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab-button.active {
+  color: #3a56e4;
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #3a56e4;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+}
+
+/* User interface styles */
+.user-interface, .executer-interface, .owner-interface {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.user-interface h2, .executer-interface h2, .owner-interface h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a2b4e;
+  margin-bottom: 1rem;
+}
+
+/* Trial details box */
+.trial-details-box {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+}
+
+.trial-details-box h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+.trial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.trial-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 0.3rem;
+}
+
+.value {
+  font-weight: 600;
+  color: #334155;
+}
+
+.status-active {
+  color: #059669;
+}
+
+.status-completed {
+  color: #3a56e4;
+}
+
+/* Pending refunds box */
+.pending-refunds-box {
+  background-color: #fff7e6;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ffe7ba;
+}
+
+.pending-refunds-box h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #d48806;
+}
+
+/* Trial configuration */
+.trial-config {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+}
+
+.trial-config h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #a5b4fc;
+  box-shadow: 0 0 0 3px rgba(165, 180, 252, 0.1);
+}
+
+.form-group input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.action-button {
+  flex: 1;
+  padding: 0.7rem 1rem;
+}
+
+.approve-btn {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.approve-btn:hover {
+  background-color: #4338ca;
+}
+
+.start-btn {
+  background-color: #059669;
+  color: white;
+}
+
+.start-btn:hover {
+  background-color: #047857;
+}
+
+.action-button:disabled {
+  background-color: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+/* Trial info */
+.trial-info {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+}
+
+.trial-info h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+.info-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.info-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.step-number {
+  background-color: #3a56e4;
+  color: white;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #1a2b4e;
+}
+
+.step-content p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Executer interface */
+.execution-form, .refund-section {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+  margin-bottom: 2rem;
+}
+
+.execution-form h3, .refund-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+.execute-btn {
+  background-color: #8b5cf6;
+  color: white;
+  margin-top: 1rem;
+}
+
+.execute-btn:hover {
+  background-color: #7c3aed;
+}
+
+.refund-btn {
+  background-color: #0ea5e9;
+  color: white;
+  margin-top: 1rem;
+}
+
+.refund-btn:hover {
+  background-color: #0284c7;
+}
+
+/* Owner interface */
+.contract-info-box {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+  margin-bottom: 2rem;
+}
+
+.contract-info-box h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+.contract-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.owner-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.control-section {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+}
+
+.control-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+.update-btn {
+  background-color: #3a56e4;
+  color: white;
+  margin-top: 0.5rem;
+}
+
+.update-btn:hover {
+  background-color: #2a46d4;
+}
+
+.reward-range {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.range-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.range-input label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+
+.funds-management {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+  margin-bottom: 2rem;
+}
+
+.funds-management h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+.funds-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.action-card {
+  background-color: #f8fafc;
+  border-radius: 8px;
+  padding: 1.2rem;
+  border: 1px solid #e0e7ff;
+}
+
+.action-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #334155;
+}
+
+.deposit-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.deposit-btn:hover {
+  background-color: #059669;
+}
+
+.withdraw-btn {
+  background-color: #f97316;
+  color: white;
+}
+
+.withdraw-btn:hover {
+  background-color: #ea580c;
+}
+
+.refund-management {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eef2ff;
+}
+
+.refund-management h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #1a2b4e;
+}
+
+/* Not connected message */
+.not-connected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.not-connected h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a2b4e;
+  margin-bottom: 1rem;
+}
+
+.not-connected p {
+  color: #64748b;
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+/* Footer */
+.arbitrage-footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.disclaimer {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .arbitrage-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .account-info {
+    width: 100%;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .trial-grid, .contract-info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .funds-actions {
+    grid-template-columns: 1fr;
+  }
+}
