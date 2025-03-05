@@ -1,4 +1,6 @@
-export const contractAddress = "0xE1b5c57bee405eAF94A16bDBd4d58a1bD45C87F1";
+// export const sepolia_contractAddress = "0xE1b5c57bee405eAF94A16bDBd4d58a1bD45C87F1";
+// export const sepolia_contractAddress = "0x6D61214031E4E6a386f98eAD55Ae38963981C22b";
+export const contractAddress = "0x4a0b172D30d75Bf2A74Bf99ED4233Fc2f6477318";
 
 // Contract ABI copied from your artifact or compilation output
 export const abi = [
@@ -6,22 +8,22 @@ export const abi = [
     inputs: [
       {
         internalType: "address",
-        name: "usdtTokenAddress",
+        name: "_usdt",
         type: "address",
       },
       {
         internalType: "address",
-        name: "aavePoolAddress",
+        name: "_aavePool",
         type: "address",
       },
       {
         internalType: "address",
-        name: "ownerAddress",
+        name: "owner",
         type: "address",
       },
       {
         internalType: "address",
-        name: "executerAddress",
+        name: "_executer",
         type: "address",
       },
     ],
@@ -30,108 +32,27 @@ export const abi = [
   },
   {
     inputs: [],
-    name: "ArbitrageBotCapacityReached",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "required",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
-        type: "uint256",
-      },
-    ],
-    name: "InsufficientBNBForGasFees",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "required",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
-        type: "uint256",
-      },
-    ],
-    name: "InsufficientExecutorBalance",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "required",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "actual",
-        type: "uint256",
-      },
-    ],
-    name: "InsufficientUSDTBalance",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "expected",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "received",
-        type: "address",
-      },
-    ],
-    name: "InvalidAssetForFlashLoan",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "min",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "max",
-        type: "uint256",
-      },
-    ],
-    name: "InvalidRewardRange",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "maxTrials",
-        type: "uint256",
-      },
-    ],
-    name: "InvalidTrialNumber",
+    name: "ArbitrageBotAtCapacity",
     type: "error",
   },
   {
     inputs: [],
-    name: "InvalidZeroAddress",
+    name: "InsufficientBNB",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InsufficientFundsForPayout",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InsufficientUSDT",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "InvalidParameters",
     type: "error",
   },
   {
@@ -158,90 +79,17 @@ export const abi = [
   },
   {
     inputs: [],
-    name: "PayoutTransferFailed",
-    type: "error",
-  },
-  {
-    inputs: [],
     name: "ReentrancyGuardReentrantCall",
     type: "error",
   },
   {
     inputs: [],
-    name: "RefundNotAuthorized",
+    name: "TrialAlreadyStarted",
     type: "error",
   },
   {
     inputs: [],
-    name: "RefundPeriodExpired",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "RefundTransferFailed",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "TrialAlreadyInProgress",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "TrialInactive",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "TrialLimitReached",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-    ],
-    name: "TrialNotMarkedForRefund",
-    type: "error",
-  },
-  {
-    inputs: [],
-    name: "TrialPeriodEnded",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "caller",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "expectedPool",
-        type: "address",
-      },
-    ],
-    name: "UnapprovedPoolCaller",
-    type: "error",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "caller",
-        type: "address",
-      },
-      {
-        internalType: "address",
-        name: "requiredExecuter",
-        type: "address",
-      },
-    ],
-    name: "UnauthorizedExecuter",
+    name: "UnauthorizedCaller",
     type: "error",
   },
   {
@@ -250,100 +98,7 @@ export const abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "userAddress",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "rewardAmount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "ArbitrageExecutionCompleted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "userAddress",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "string",
-        name: "reason",
-        type: "string",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "ArbitrageExecutionFailed",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "userAddress",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "loanAmount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "ArbitrageExecutionStarted",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "recipient",
+        name: "owner",
         type: "address",
       },
       {
@@ -352,64 +107,21 @@ export const abi = [
         name: "amount",
         type: "uint256",
       },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
     ],
-    name: "BNBFundsWithdrawn",
+    name: "BNBRetrieved",
     type: "event",
   },
   {
     anonymous: false,
     inputs: [
       {
-        indexed: true,
-        internalType: "address",
-        name: "previousExecuter",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newExecuter",
-        type: "address",
-      },
-      {
         indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
+        internalType: "address",
+        name: "newExecutor",
+        type: "address",
       },
     ],
-    name: "ExecuterWalletUpdated",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "previousCollector",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "newCollector",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "FeeCollectorUpdated",
+    name: "ExecutorWalletUpdated",
     type: "event",
   },
   {
@@ -435,37 +147,19 @@ export const abi = [
     anonymous: false,
     inputs: [
       {
-        indexed: false,
-        internalType: "uint256",
-        name: "previousMinimum",
-        type: "uint256",
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
       },
       {
         indexed: false,
         internalType: "uint256",
-        name: "previousMaximum",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "newMinimum",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "newMaximum",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
+        name: "reward",
         type: "uint256",
       },
     ],
-    name: "RewardRangeConfigured",
+    name: "TrialArbitrageCompleted",
     type: "event",
   },
   {
@@ -474,7 +168,7 @@ export const abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "userAddress",
+        name: "user",
         type: "address",
       },
       {
@@ -486,23 +180,11 @@ export const abi = [
       {
         indexed: false,
         internalType: "uint256",
-        name: "usdtDepositAmount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "bnbFeeAmount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
+        name: "usdtAmountDeposited",
         type: "uint256",
       },
     ],
-    name: "TrialInitiated",
+    name: "TrialStarted",
     type: "event",
   },
   {
@@ -511,38 +193,7 @@ export const abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "userAddress",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "refundAmount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
-    ],
-    name: "TrialRefundProcessed",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "depositor",
+        name: "owner",
         type: "address",
       },
       {
@@ -551,14 +202,8 @@ export const abi = [
         name: "amount",
         type: "uint256",
       },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
     ],
-    name: "USDTFundsDeposited",
+    name: "USDTDeposited",
     type: "event",
   },
   {
@@ -567,7 +212,7 @@ export const abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "recipient",
+        name: "owner",
         type: "address",
       },
       {
@@ -576,14 +221,8 @@ export const abi = [
         name: "amount",
         type: "uint256",
       },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "timestamp",
-        type: "uint256",
-      },
     ],
-    name: "USDTFundsWithdrawn",
+    name: "USDTRetrieved",
     type: "event",
   },
   {
@@ -602,19 +241,20 @@ export const abi = [
   {
     inputs: [
       {
-        internalType: "uint256",
-        name: "newMinimum",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "newMaximum",
-        type: "uint256",
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
-    name: "configureRewardRange",
-    outputs: [],
-    stateMutability: "nonpayable",
+    name: "activeTrials",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -644,11 +284,11 @@ export const abi = [
       },
       {
         internalType: "address",
-        name: "userAddress",
+        name: "user",
         type: "address",
       },
     ],
-    name: "executeArbitrageOperation",
+    name: "executeArbitrage",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -672,7 +312,7 @@ export const abi = [
       },
       {
         internalType: "address",
-        name: "",
+        name: "initiator",
         type: "address",
       },
       {
@@ -694,7 +334,7 @@ export const abi = [
   },
   {
     inputs: [],
-    name: "executerWallet",
+    name: "executer",
     outputs: [
       {
         internalType: "address",
@@ -722,46 +362,7 @@ export const abi = [
     inputs: [
       {
         internalType: "address",
-        name: "userAddress",
-        type: "address",
-      },
-    ],
-    name: "getUserTrialDetails",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "completedTrials",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "startTime",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "depositedAmount",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "isActive",
-        type: "bool",
-      },
-      {
-        internalType: "bool",
-        name: "isCompleted",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "userAddress",
+        name: "user",
         type: "address",
       },
     ],
@@ -771,56 +372,6 @@ export const abi = [
         internalType: "bool",
         name: "",
         type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "userAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-    ],
-    name: "isTrialPendingRefund",
-    outputs: [
-      {
-        internalType: "bool",
-        name: "",
-        type: "bool",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "maximumRewardAmount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "minimumRewardAmount",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -840,31 +391,22 @@ export const abi = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "address",
-        name: "userAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "trialNumber",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "refundAmount",
-        type: "uint256",
-      },
-    ],
-    name: "processFailedTrialRefund",
+    inputs: [],
+    name: "renounceOwnership",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
     inputs: [],
-    name: "renounceOwnership",
+    name: "retrieveBNB",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "retrieveUSDT",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -878,11 +420,11 @@ export const abi = [
       },
       {
         internalType: "uint256",
-        name: "usdtDepositAmount",
+        name: "usdtAmountDeposited",
         type: "uint256",
       },
     ],
-    name: "startArbitrageTrial",
+    name: "startTrial",
     outputs: [],
     stateMutability: "payable",
     type: "function",
@@ -904,31 +446,18 @@ export const abi = [
     inputs: [
       {
         internalType: "address",
-        name: "newExecuterWallet",
+        name: "newExecutor",
         type: "address",
       },
     ],
-    name: "updateExecuterWallet",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "newFeeCollector",
-        type: "address",
-      },
-    ],
-    name: "updateFeeCollector",
+    name: "updateExecutorWallet",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
     inputs: [],
-    name: "usdtToken",
+    name: "usdt",
     outputs: [
       {
         internalType: "contract IERC20",
@@ -940,17 +469,51 @@ export const abi = [
     type: "function",
   },
   {
-    inputs: [],
-    name: "withdrawBNB",
-    outputs: [],
-    stateMutability: "nonpayable",
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "userTrials",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "trialsCompleted",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "lastTrialStart",
+        type: "uint256",
+      },
+      {
+        internalType: "bool",
+        name: "isActive",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
-    inputs: [],
-    name: "withdrawUSDT",
-    outputs: [],
-    stateMutability: "nonpayable",
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "usersTrialStarted",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
