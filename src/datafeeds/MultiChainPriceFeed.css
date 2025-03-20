@@ -10,7 +10,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 40px;
+  margin: 40px;
 }
 
 .price-feed-header h2 {
@@ -242,6 +242,6 @@
   }
   
   .price-feed-header {
-    margin-bottom: 20px;
+    margin: 20px;
   }
 }
