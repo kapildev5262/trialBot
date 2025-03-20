@@ -27,16 +27,28 @@ const SecureArbitrageComponent = () => {
   const [currentTab, setCurrentTab] = useState("user");
   const [contractInfo, setContractInfo] = useState({
     executerWallet: "",
-    feeCollector: "",
     minimumReward: "0",
     maximumReward: "0",
+    arbitrageBotMinimumBalance: "0",
+    minDeposit: "0",
+    maxFlashLoanAmount: "0",
+    trialLimit: 0,
+    timeLimit: 0,
   });
   const [executionData, setExecutionData] = useState({
     loanAmount: "1000",
     usdtAmount: "100",
     userAddress: "",
   });
+  const [refundUserAddress, setRefundUserAddress] = useState("");
   const [newExecuterWallet, setNewExecuterWallet] = useState("");
+  const [newAavePool, setNewAavePool] = useState("");
+  const [contractUsdtBalance, setContractUsdtBalance] = useState("0");
+  const [contractBnbBalance, setContractBnbBalance] = useState("0");
+  const [functionToggleData, setFunctionToggleData] = useState({
+    functionSelector: "",
+    allowed: true,
+  });
 
   // BSC Mainnet network parameters
   const BSC_CHAIN_ID = "0x38"; // Chain ID for BSC Mainnet in hex
@@ -50,6 +62,17 @@ const SecureArbitrageComponent = () => {
     },
     rpcUrls: ["https://bsc-dataseed.binance.org/"],
     blockExplorerUrls: ["https://bscscan.com"],
+  };
+
+  // Contract constants (from the contract)
+  const CONTRACT_CONSTANTS = {
+    TRIAL_LIMIT: 3,
+    TIME_LIMIT: 3600, // 1 hour in seconds
+    MIN_REWARD: ethers.parseEther("0.1"), // 0.1 BNB in wei (1e17)
+    MAX_REWARD: ethers.parseEther("1.0"), // 1 BNB in wei (1e18)
+    MINIMUM_DEPOSIT: ethers.parseEther("0.008"), // 0.008 BNB in wei (8e15)
+    ARBITRAGE_BOT_MINIMUM_BALANCE: ethers.parseEther("6.0"), // 6 BNB in wei (6e18)
+    MAX_FLASH_LOAN_AMOUNT: ethers.parseUnits("1000", 18), // 1000 USDT
   };
 
   // Function to ensure the wallet is connected to BSC Mainnet
@@ -158,7 +181,7 @@ const SecureArbitrageComponent = () => {
         window.location.reload();
       });
 
-      await loadBalances(connectedAccount, ethersProvider, usdtContractInstance);
+      await loadBalances(connectedAccount, ethersProvider, usdtContractInstance, contractInstance);
       await loadTrialDetails(connectedAccount, contractInstance);
 
       setSuccess("Wallet connected successfully!");
@@ -198,12 +221,16 @@ const SecureArbitrageComponent = () => {
 
     try {
       const executerWallet = await contractInstance.executer();
-      const feeCollector = await contractInstance.feeCollector();
 
       setContractInfo({
         executerWallet,
-        feeCollector,
-        // Note: Removed specific reward amount retrieval as it's not in the current contract
+        minimumReward: ethers.formatEther(CONTRACT_CONSTANTS.MIN_REWARD),
+        maximumReward: ethers.formatEther(CONTRACT_CONSTANTS.MAX_REWARD),
+        arbitrageBotMinimumBalance: ethers.formatEther(CONTRACT_CONSTANTS.ARBITRAGE_BOT_MINIMUM_BALANCE),
+        minDeposit: ethers.formatEther(CONTRACT_CONSTANTS.MINIMUM_DEPOSIT),
+        maxFlashLoanAmount: ethers.formatUnits(CONTRACT_CONSTANTS.MAX_FLASH_LOAN_AMOUNT, 18),
+        trialLimit: CONTRACT_CONSTANTS.TRIAL_LIMIT,
+        timeLimit: CONTRACT_CONSTANTS.TIME_LIMIT / 3600, // Convert to hours
       });
     } catch (error) {
       console.error("Error loading contract info:", error);
@@ -211,17 +238,34 @@ const SecureArbitrageComponent = () => {
   };
 
   // Function to load user balances
-  const loadBalances = async (userAccount, ethersProvider, tokenContract) => {
+  const loadBalances = async (userAccount, ethersProvider, tokenContract, contractInstance) => {
     if (!userAccount || !ethersProvider || !tokenContract) return;
 
     try {
+      // Load user BNB balance
       const ethBalanceWei = await ethersProvider.getBalance(userAccount);
       const ethBalanceEth = ethers.formatEther(ethBalanceWei);
       setBnbBalance(ethBalanceEth);
 
+      // Load user USDT balance
       const usdtBalanceWei = await tokenContract.balanceOf(userAccount);
       const usdtBalanceFormated = ethers.formatUnits(usdtBalanceWei, 18);
       setUsdtBalance(usdtBalanceFormated);
+
+      // If contract instance is available, load contract balances
+      if (contractInstance) {
+        const contractAddress = await contractInstance.getAddress();
+
+        // Load contract BNB balance
+        const contractBnbBalanceWei = await ethersProvider.getBalance(contractAddress);
+        const contractBnbBalanceFormatted = ethers.formatEther(contractBnbBalanceWei);
+        setContractBnbBalance(contractBnbBalanceFormatted);
+
+        // Load contract USDT balance
+        const contractUsdtBalanceWei = await tokenContract.balanceOf(contractAddress);
+        const contractUsdtBalanceFormatted = ethers.formatUnits(contractUsdtBalanceWei, 18);
+        setContractUsdtBalance(contractUsdtBalanceFormatted);
+      }
     } catch (error) {
       console.error("Balance Loading Error:", error);
     }
@@ -232,12 +276,19 @@ const SecureArbitrageComponent = () => {
     if (!userAccount || !contractInstance) return;
 
     try {
-      const trial = await contractInstance.userTrials(userAccount);
+      const trial = await contractInstance.getUserTrial(userAccount);
+      const isTrialCompleted = await contractInstance.isTrialCompleted(userAccount);
 
       setTrialDetails({
-        completedTrials: Number(trial.trialsCompleted),
-        startTime: Number(trial.lastTrialStart) > 0 ? new Date(Number(trial.lastTrialStart) * 1000).toLocaleString() : "Not started",
-        isActive: trial.isActive,
+        trialsCompleted: Number(trial.trialsCompleted),
+        timestamp: Number(trial.timestamp),
+        active: trial.active,
+        bnbDeposited: ethers.formatEther(trial.bnbDeposited),
+        usdtDeposited: ethers.formatUnits(trial.usdtDeposited, 18),
+        loanAmount: ethers.formatUnits(trial.loanAmount, 18),
+        refundsProcessed: Number(trial.refundsProcessed),
+        payoutsReceived: Number(trial.payoutsReceived),
+        completed: isTrialCompleted,
       });
     } catch (error) {
       console.error("Trial Details Loading Error:", error);
@@ -248,11 +299,11 @@ const SecureArbitrageComponent = () => {
   useEffect(() => {
     if (!account || !provider || !usdtContract || !contract) return;
 
-    loadBalances(account, provider, usdtContract);
+    loadBalances(account, provider, usdtContract, contract);
     loadTrialDetails(account, contract);
 
     const interval = setInterval(() => {
-      loadBalances(account, provider, usdtContract);
+      loadBalances(account, provider, usdtContract, contract);
       loadTrialDetails(account, contract);
     }, 10000);
 
@@ -271,7 +322,7 @@ const SecureArbitrageComponent = () => {
     setSuccess("");
 
     try {
-      const depositAmountWei = ethers.parseUnits(usdtDepositAmount, 18);
+      const depositAmountWei = ethers.parseUnits(usdtDepositAmount);
 
       const currentAllowance = await usdtContract.allowance(account, contractAddress);
 
@@ -292,7 +343,6 @@ const SecureArbitrageComponent = () => {
     }
   };
 
-  // Function to start arbitrage trial
   const startTrial = async () => {
     if (!contract) return;
 
@@ -304,16 +354,26 @@ const SecureArbitrageComponent = () => {
     setSuccess("");
 
     try {
-      const flashLoanAmountWei = ethers.parseUnits(flashLoanAmount, 18);
-      const depositAmountWei = ethers.parseUnits(usdtDepositAmount, 18);
+      // Ensure flash loan amount doesn't exceed maximum
+      if (parseFloat(flashLoanAmount) > parseFloat(contractInfo.maxFlashLoanAmount)) {
+        throw new Error(`Flash loan amount cannot exceed ${contractInfo.maxFlashLoanAmount}`);
+      }
+
+      const flashLoanAmountWei = ethers.parseUnits(flashLoanAmount);
+      const depositAmountWei = ethers.parseUnits(usdtDepositAmount);
       const bnbFeeAmountWei = ethers.parseEther(bnbFeeAmount);
+
+      // Check if BNB amount is at least the minimum required
+      if (bnbFeeAmountWei < CONTRACT_CONSTANTS.MINIMUM_DEPOSIT) {
+        throw new Error(`BNB fee must be at least ${ethers.formatEther(CONTRACT_CONSTANTS.MINIMUM_DEPOSIT)} BNB`);
+      }
 
       const tx = await contract.startTrial(flashLoanAmountWei, depositAmountWei, { value: bnbFeeAmountWei });
 
       setSuccess("Transaction sent. Please wait for confirmation...");
 
       await tx.wait();
-      await loadBalances(account, provider, usdtContract);
+      await loadBalances(account, provider, usdtContract, contract);
       await loadTrialDetails(account, contract);
 
       setSuccess("Arbitrage trial started successfully!");
@@ -326,7 +386,7 @@ const SecureArbitrageComponent = () => {
         try {
           const decodedError = contract.interface.parseError(error.data);
 
-          if (decodedError && decodedError.signature) {
+          if (decodedError && decodedError.name) {
             const errorName = decodedError.name;
 
             // Handle specific known errors from the contract
@@ -342,6 +402,9 @@ const SecureArbitrageComponent = () => {
                 break;
               case "TrialAlreadyStarted":
                 errorMessage = "A trial is already in progress";
+                break;
+              case "MaxInputExceeded":
+                errorMessage = "Flash loan amount exceeds maximum";
                 break;
               default:
                 errorMessage = `Contract error: ${errorName}`;
@@ -367,14 +430,32 @@ const SecureArbitrageComponent = () => {
     setLoading(true);
     setError("");
     setSuccess("");
-
+    console.log("Contract address:", contract.target);
+    console.log("Contract interface:", contract.interface);
     try {
-      const loanAmountWei = ethers.parseUnits(executionData.loanAmount, 18);
-      const usdtAmountWei = ethers.parseUnits(executionData.usdtAmount, 18);
+      const loanAmountWei = ethers.parseUnits(executionData.loanAmount);
+      const usdtAmountWei = ethers.parseUnits(executionData.usdtAmount);
       const userAddress = executionData.userAddress;
 
+      console.log("Loan Amount:", loanAmountWei.toString());
+      console.log("USDT Amount:", usdtAmountWei.toString());
+      console.log("User Address:", userAddress);
+
+      const trialStatus = await contract.getUserTrial(userAddress);
+      console.log("Trial Status:", {
+        active: trialStatus.active,
+        trialsCompleted: trialStatus.trialsCompleted.toString(),
+        payoutsReceived: trialStatus.payoutsReceived.toString(),
+        refundsProcessed: trialStatus.refundsProcessed.toString(),
+      });
+
+      // Input validation
       if (!ethers.isAddress(userAddress)) {
         throw new Error("Invalid user address");
+      }
+
+      if (parseFloat(executionData.loanAmount) > parseFloat(contractInfo.maxFlashLoanAmount)) {
+        throw new Error(`Flash loan amount cannot exceed ${contractInfo.maxFlashLoanAmount}`);
       }
 
       const tx = await contract.executeArbitrage(loanAmountWei, usdtAmountWei, userAddress);
@@ -382,6 +463,7 @@ const SecureArbitrageComponent = () => {
       setSuccess("Arbitrage execution transaction sent. Please wait for confirmation...");
 
       await tx.wait();
+      await loadTrialDetails(userAddress, contract);
 
       setSuccess("Arbitrage operation executed successfully!");
     } catch (error) {
@@ -393,7 +475,7 @@ const SecureArbitrageComponent = () => {
         try {
           const decodedError = contract.interface.parseError(error.data);
 
-          if (decodedError && decodedError.signature) {
+          if (decodedError && decodedError.name) {
             const errorName = decodedError.name;
 
             switch (errorName) {
@@ -404,7 +486,87 @@ const SecureArbitrageComponent = () => {
                 errorMessage = "Arbitrage bot is at capacity";
                 break;
               case "TrialAlreadyStarted":
-                errorMessage = "Trial is already in progress";
+                errorMessage = "Invalid trial state";
+                break;
+              case "TrialLimitExceeded":
+                errorMessage = "Trial limit exceeded";
+                break;
+              case "TrialNotActive":
+                errorMessage = "Trial is not active";
+                break;
+              case "MaxInputExceeded":
+                errorMessage = "Flash loan amount exceeds maximum";
+                break;
+              default:
+                errorMessage = `Contract error: ${errorName}`;
+            }
+          }
+        } catch (parseError) {
+          errorMessage += ": " + (error.reason || error.message || "Unknown custom error");
+        }
+      } else {
+        errorMessage += ": " + (error.reason || error.message || "Unknown error");
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Process refund for a user (executer only)
+  const processRefund = async () => {
+    if (!contract || !isExecuter) return;
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const userAddress = refundUserAddress;
+
+      if (!ethers.isAddress(userAddress)) {
+        throw new Error("Invalid user address");
+      }
+
+      // Get user trial data to calculate required BNB amount
+      const userTrialData = await contract.getUserTrial(userAddress);
+
+      // Send the transaction with calculated ETH value
+      const tx = await contract.processRefund(userAddress, {
+        value: ethers.parseEther("0.004"),
+      });
+
+      setSuccess("Refund processing transaction sent. Please wait for confirmation...");
+
+      await tx.wait();
+      await loadTrialDetails(userAddress, contract);
+
+      setSuccess("Refund processed successfully!");
+    } catch (error) {
+      console.error("Refund Processing Error:", error);
+
+      let errorMessage = "Failed to process refund";
+
+      if (error.data) {
+        try {
+          const decodedError = contract.interface.parseError(error.data);
+
+          if (decodedError && decodedError.name) {
+            const errorName = decodedError.name;
+
+            switch (errorName) {
+              case "NoActiveTrialToRefund":
+                errorMessage = "No active trial to refund";
+                break;
+              case "RefundLimitExceeded":
+                errorMessage = "Refund limit exceeded";
+                break;
+              case "TrialLimitExceeded":
+                errorMessage = "Trial limit exceeded";
+                break;
+              case "InsufficientBNB":
+                errorMessage = "Insufficient BNB for refund";
                 break;
               default:
                 errorMessage = `Contract error: ${errorName}`;
@@ -424,7 +586,7 @@ const SecureArbitrageComponent = () => {
   };
 
   // Owner function to update executor wallet
-  const updateExecutorWallet = async () => {
+  const updateExecuter = async () => {
     if (!contract || !isOwner) return;
 
     setLoading(true);
@@ -436,7 +598,7 @@ const SecureArbitrageComponent = () => {
         throw new Error("Invalid executor address");
       }
 
-      const tx = await contract.updateExecutorWallet(newExecuterWallet);
+      const tx = await contract.updateExecuter(newExecuterWallet);
 
       setSuccess("Executor update transaction sent. Please wait for confirmation...");
 
@@ -454,16 +616,249 @@ const SecureArbitrageComponent = () => {
         try {
           const decodedError = contract.interface.parseError(error.data);
 
-          if (decodedError && decodedError.signature) {
+          if (decodedError && decodedError.name) {
             const errorName = decodedError.name;
 
             switch (errorName) {
-              case "InvalidParameters":
-                errorMessage = "Invalid executor address";
+              case "ZeroAddressNotAllowed":
+                errorMessage = "Zero address not allowed";
                 break;
               default:
                 errorMessage = `Contract error: ${errorName}`;
             }
+          }
+        } catch (parseError) {
+          errorMessage += ": " + (error.reason || error.message || "Unknown custom error");
+        }
+      } else {
+        errorMessage += ": " + (error.reason || error.message || "Unknown error");
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateAavePool = async () => {
+    if (!contract || !isOwner) return;
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      if (!ethers.isAddress(newAavePool)) {
+        throw new Error("Invalid Aave pool address");
+      }
+
+      const tx = await contract.updatePool(newAavePool);
+
+      setSuccess("Aave pool update transaction sent. Please wait for confirmation...");
+
+      await tx.wait();
+      await loadContractInfo(contract);
+
+      setSuccess("Aave pool updated successfully!");
+      setNewAavePool("");
+    } catch (error) {
+      console.error("Aave Pool Update Error:", error);
+
+      let errorMessage = "Failed to update Aave pool";
+
+      if (error.data) {
+        try {
+          const decodedError = contract.interface.parseError(error.data);
+
+          if (decodedError && decodedError.name) {
+            const errorName = decodedError.name;
+
+            switch (errorName) {
+              case "ZeroAddressNotAllowed":
+                errorMessage = "Zero address not allowed";
+                break;
+              default:
+                errorMessage = `Contract error: ${errorName}`;
+            }
+          }
+        } catch (parseError) {
+          errorMessage += ": " + (error.reason || error.message || "Unknown custom error");
+        }
+      } else {
+        errorMessage += ": " + (error.reason || error.message || "Unknown error");
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to toggle contract function permission
+  const toggleFunction = async () => {
+    if (!contract || !isOwner) return;
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const { functionSelector, allowed } = functionToggleData;
+
+      if (!functionSelector || functionSelector.length !== 10 || !functionSelector.startsWith("0x")) {
+        throw new Error("Invalid function selector (must be 10 characters starting with 0x)");
+      }
+
+      const tx = await contract.toggleFunction(functionSelector, allowed);
+
+      setSuccess("Function toggle transaction sent. Please wait for confirmation...");
+
+      await tx.wait();
+
+      setSuccess(`Function ${functionSelector} permissions updated successfully!`);
+      setFunctionToggleData({ functionSelector: "", allowed: true });
+    } catch (error) {
+      console.error("Function Toggle Error:", error);
+      setError("Failed to toggle function: " + (error.reason || error.message || "Unknown error"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to retrieve USDT from contract
+  const retrieveUSDT = async () => {
+    if (!contract || !isOwner) return;
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const tx = await contract.retrieveUSDT();
+      setSuccess("USDT retrieval transaction sent. Please wait for confirmation...");
+
+      await tx.wait();
+
+      // Reload balances to reflect the changes
+      await loadBalances(account, provider, usdtContract, contract);
+
+      setSuccess("USDT retrieved successfully!");
+    } catch (error) {
+      console.error("USDT Retrieval Error:", error);
+
+      let errorMessage = "Failed to retrieve USDT";
+
+      if (error.data) {
+        try {
+          const decodedError = contract.interface.parseError(error.data);
+
+          if (decodedError && decodedError.name) {
+            errorMessage = `Contract error: ${decodedError.name}`;
+          }
+        } catch (parseError) {
+          errorMessage += ": " + (error.reason || error.message || "Unknown custom error");
+        }
+      } else {
+        errorMessage += ": " + (error.reason || error.message || "Unknown error");
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to retrieve BNB from contract
+  const retrieveBNB = async () => {
+    if (!contract || !isOwner) return;
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const tx = await contract.retrieveBNB();
+      setSuccess("BNB retrieval transaction sent. Please wait for confirmation...");
+
+      await tx.wait();
+
+      // Reload balances to reflect the changes
+      await loadBalances(account, provider, usdtContract, contract);
+
+      setSuccess("BNB retrieved successfully!");
+    } catch (error) {
+      console.error("BNB Retrieval Error:", error);
+
+      let errorMessage = "Failed to retrieve BNB";
+
+      if (error.data) {
+        try {
+          const decodedError = contract.interface.parseError(error.data);
+
+          if (decodedError && decodedError.name) {
+            errorMessage = `Contract error: ${decodedError.name}`;
+          }
+        } catch (parseError) {
+          errorMessage += ": " + (error.reason || error.message || "Unknown custom error");
+        }
+      } else {
+        errorMessage += ": " + (error.reason || error.message || "Unknown error");
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to deposit USDT into the contract
+  const depositUSDT = async () => {
+    if (!contract || !isOwner || !usdtContract) return;
+
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const depositAmount = prompt("Enter USDT amount to deposit:", "10");
+
+      if (!depositAmount) {
+        setLoading(false);
+        return; // User canceled
+      }
+
+      const depositAmountWei = ethers.parseUnits(depositAmount);
+
+      // First, approve the contract to spend USDT
+      const currentAllowance = await usdtContract.allowance(account, contractAddress);
+
+      if (currentAllowance < depositAmountWei) {
+        const approveTx = await usdtContract.approve(contractAddress, depositAmountWei);
+        setSuccess("Approval transaction sent. Please wait for confirmation...");
+        await approveTx.wait();
+      }
+
+      // Then call the deposit function
+      const tx = await contract.depositUSDT(depositAmountWei);
+      setSuccess("USDT deposit transaction sent. Please wait for confirmation...");
+
+      await tx.wait();
+
+      // Reload balances to reflect the changes
+      await loadBalances(account, provider, usdtContract, contract);
+
+      setSuccess("USDT deposited successfully!");
+    } catch (error) {
+      console.error("USDT Deposit Error:", error);
+
+      let errorMessage = "Failed to deposit USDT";
+
+      if (error.data) {
+        try {
+          const decodedError = contract.interface.parseError(error.data);
+
+          if (decodedError && decodedError.signature) {
+            errorMessage = `Contract error: ${decodedError.name}`;
           }
         } catch (parseError) {
           errorMessage += ": " + (error.reason || error.message || "Unknown custom error");
@@ -497,23 +892,37 @@ const SecureArbitrageComponent = () => {
     currentTab,
     executionData,
     newExecuterWallet,
+    contractUsdtBalance,
+    contractBnbBalance,
+    refundUserAddress,
+    functionToggleData,
+    newAavePool,
+
     // Form update handlers
+    setNewAavePool,
     setFlashLoanAmount,
     setUsdtDepositAmount,
     setbnbFeeAmount,
     setExecutionData,
     setCurrentTab,
     setNewExecuterWallet,
+    setRefundUserAddress,
+    setFunctionToggleData,
     // Functions
     connectWallet,
     disconnectWallet,
     approveUSDT,
     startTrial,
     executeArbitrage,
-    updateExecutorWallet,
+    updateExecuter,
+    retrieveUSDT,
+    retrieveBNB,
+    depositUSDT,
+    processRefund,
+    toggleFunction,
+    updateAavePool,
   };
 
-  // Render the UI component with all the props
   return <ArbitrageUI {...uiProps} />;
 };
 

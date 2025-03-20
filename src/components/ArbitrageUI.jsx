@@ -1,8 +1,7 @@
-import React from 'react';
-import './ArbitrageStyles.css';
+import React from "react";
+import "./ArbitrageStyles.css";
 
 const ArbitrageUI = ({
-  // Account and network info
   account,
   networkName,
   bnbBalance,
@@ -10,47 +9,55 @@ const ArbitrageUI = ({
   loading,
   error,
   success,
-
-  // Trial details
   trialDetails,
   flashLoanAmount,
   usdtDepositAmount,
   bnbFeeAmount,
   isOwner,
   isExecuter,
-  currentTab,
   contractInfo,
+  currentTab,
   executionData,
   newExecuterWallet,
-
+  contractUsdtBalance,
+  contractBnbBalance,
+  refundUserAddress,
+  functionToggleData,
+  newAavePool,
   // Form update handlers
   setFlashLoanAmount,
   setUsdtDepositAmount,
   setbnbFeeAmount,
-  setCurrentTab,
   setExecutionData,
+  setCurrentTab,
   setNewExecuterWallet,
-
-  // Connection functions
+  setRefundUserAddress,
+  setFunctionToggleData,
+  setnewAavePol,
+  // Functions
   connectWallet,
   disconnectWallet,
-
-  // User operations
   approveUSDT,
   startTrial,
   executeArbitrage,
-  updateExecutorWallet,
+  updateExecuter,
+  retrieveUSDT,
+  retrieveBNB,
+  depositUSDT,
+  processRefund,
+  toggleFunction,
+  updateAavePool,
 }) => {
   return (
     <div className="arbitrage-container">
       {/* Header Section */}
       <div className="arbitrage-header">
-        <h1>Secure Arbitrage Trial (Sepolia Testnet)</h1>
+        <h1>Secure Arbitrage Trial (BSC Mainnet)</h1>
         {account ? (
           <div className="account-info">
             <p>Network: {networkName || "Not connected"}</p>
             <p>Account: {account ? `${account.slice(0, 6)}...${account.slice(-4)}` : "Not connected"}</p>
-            <p>ETH Balance: {parseFloat(bnbBalance).toFixed(4)} ETH</p>
+            <p>BNB Balance: {parseFloat(bnbBalance).toFixed(4)} BNB</p>
             <p>USDT Balance: {parseFloat(usdtBalance).toFixed(2)} USDT</p>
             <div className="account-actions">
               <button onClick={disconnectWallet} className="disconnect-btn">
@@ -104,15 +111,15 @@ const ArbitrageUI = ({
                 <div className="trial-grid">
                   <div className="trial-item">
                     <span className="label">Completed Trials:</span>
-                    <span className="value">{trialDetails.completedTrials}</span>
+                    <span className="value">{trialDetails.trialsCompleted}</span>
                   </div>
                   <div className="trial-item">
                     <span className="label">Last Trial Start:</span>
-                    <span className="value">{trialDetails.startTime}</span>
+                    <span className="value">{new Date(trialDetails.timestamp * 1000).toLocaleString()}</span>
                   </div>
                   <div className="trial-item">
                     <span className="label">Status:</span>
-                    <span className={`value ${trialDetails.isActive ? "status-active" : "status-inactive"}`}>{trialDetails.isActive ? "Active" : "Not Started"}</span>
+                    <span className={`value ${trialDetails.active ? "status-active" : "status-inactive"}`}>{trialDetails.active ? "Active" : "Not Started"}</span>
                   </div>
                 </div>
               </div>
@@ -124,25 +131,25 @@ const ArbitrageUI = ({
 
               <div className="form-group">
                 <label>Flash Loan Amount (USDT):</label>
-                <input type="number" value={flashLoanAmount} onChange={(e) => setFlashLoanAmount(e.target.value)} disabled={trialDetails?.isActive} min="100" max="10000" />
+                <input type="number" value={flashLoanAmount} onChange={(e) => setFlashLoanAmount(e.target.value)} disabled={trialDetails?.active} min="100" max="10000" />
               </div>
 
               <div className="form-group">
                 <label>USDT Deposit Amount:</label>
-                <input type="number" value={usdtDepositAmount} onChange={(e) => setUsdtDepositAmount(e.target.value)} disabled={trialDetails?.isActive} min="10" max="1000" />
+                <input type="number" value={usdtDepositAmount} onChange={(e) => setUsdtDepositAmount(e.target.value)} disabled={trialDetails?.active} min="10" max="1000" />
               </div>
 
               <div className="form-group">
-                <label>ETH Fee Amount:</label>
-                <input type="number" value={bnbFeeAmount} onChange={(e) => setbnbFeeAmount(e.target.value)} disabled={trialDetails?.isActive} min="0.001" max="0.1" step="0.001" />
+                <label>BNB Fee Amount:</label>
+                <input type="number" value={bnbFeeAmount} onChange={(e) => setbnbFeeAmount(e.target.value)} disabled={trialDetails?.active} min="0.001" max="0.1" step="0.001" />
               </div>
 
               <div className="action-buttons">
-                <button onClick={approveUSDT} disabled={loading || trialDetails?.isActive} className="action-button approve-btn">
+                <button onClick={approveUSDT} disabled={loading || trialDetails?.active} className="action-button approve-btn">
                   {loading ? "Processing..." : "Approve USDT"}
                 </button>
 
-                <button onClick={startTrial} className="action-button start-btn" disabled={loading || trialDetails?.isActive}>
+                <button onClick={startTrial} className="action-button start-btn" disabled={loading || trialDetails?.active}>
                   {loading ? "Processing..." : "Start Trial"}
                 </button>
               </div>
@@ -150,7 +157,7 @@ const ArbitrageUI = ({
               {(parseFloat(usdtBalance) < parseFloat(usdtDepositAmount) || parseFloat(bnbBalance) < parseFloat(bnbFeeAmount)) && (
                 <div className="warning-message">
                   {parseFloat(usdtBalance) < parseFloat(usdtDepositAmount) && <p>Insufficient USDT balance. You need at least {usdtDepositAmount} USDT.</p>}
-                  {parseFloat(bnbBalance) < parseFloat(bnbFeeAmount) && <p>Insufficient ETH balance. You need at least {bnbFeeAmount} ETH.</p>}
+                  {parseFloat(bnbBalance) < parseFloat(bnbFeeAmount) && <p>Insufficient BNB balance. You need at least {bnbFeeAmount} BNB.</p>}
                 </div>
               )}
             </div>
@@ -170,14 +177,14 @@ const ArbitrageUI = ({
                   <div className="step-number">2</div>
                   <div className="step-content">
                     <h4>Start Trial</h4>
-                    <p>Deposit USDT and ETH to start your arbitrage trial.</p>
+                    <p>Deposit USDT and BNB to start your arbitrage trial.</p>
                   </div>
                 </div>
                 <div className="info-step">
                   <div className="step-number">3</div>
                   <div className="step-content">
                     <h4>Wait for Execution</h4>
-                    <p>The arbitrage bot will execute your trial within 24 hours.</p>
+                    <p>The arbitrage bot will execute your trial within the time limit.</p>
                   </div>
                 </div>
                 <div className="info-step">
@@ -213,6 +220,22 @@ const ArbitrageUI = ({
                 {loading ? "Processing..." : "Execute Arbitrage"}
               </button>
             </div>
+
+            {/* Refund Processing Section */}
+            <div className="refund-section">
+              <h3>Process Refund</h3>
+              <div className="form-group">
+                <label>User Address:</label>
+                <input type="text" placeholder="Enter user address" value={refundUserAddress || ""} onChange={(e) => setRefundUserAddress(e.target.value)} />
+              </div>
+              <button onClick={processRefund} className="action-button refund-btn" disabled={loading || !refundUserAddress}>
+                {loading ? "Processing..." : "Process Refund"}
+              </button>
+              <div className="refund-info">
+                <p>Process a refund for users with active trials</p>
+                <p>Note: This will require a small BNB fee to cover transaction costs</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -220,20 +243,72 @@ const ArbitrageUI = ({
         {currentTab === "owner" && isOwner && (
           <div className="owner-interface">
             <h2>Contract Management</h2>
+
             <div className="contract-info">
               <h3>Current Contract Details</h3>
               <p>Executer Wallet: {contractInfo.executerWallet}</p>
-              <p>Fee Collector: {contractInfo.feeCollector}</p>
+              <div className="contract-balances">
+                <h4>Contract Balances:</h4>
+                <p>BNB Balance: {parseFloat(contractBnbBalance).toFixed(4)} BNB</p>
+                <p>USDT Balance: {parseFloat(contractUsdtBalance).toFixed(2)} USDT</p>
+              </div>
             </div>
-            <div className="update-executer-form">
+
+            <div className="management-section">
               <h3>Update Executer Wallet</h3>
               <div className="form-group">
                 <label>New Executer Wallet Address:</label>
                 <input type="text" value={newExecuterWallet} onChange={(e) => setNewExecuterWallet(e.target.value)} />
               </div>
-              <button onClick={updateExecutorWallet} className="action-button update-btn" disabled={loading}>
+              <button onClick={updateExecuter} className="action-button update-btn" disabled={loading}>
                 {loading ? "Processing..." : "Update Executer Wallet"}
               </button>
+            </div>
+
+            <div className="management-section">
+              <h3>Update Aave Pool Address</h3>
+              <div className="form-group">
+                <label>New Aave Pool Address:</label>
+                <input type="text" value={newAavePool} onChange={(e) => setnewAavePol(e.target.value)} />
+              </div>
+              <button onClick={updateAavePool} className="action-button update-btn" disabled={loading}>
+                {loading ? "Processing..." : "Update Aave Pool"}
+              </button>
+            </div>
+
+            <div className="management-section">
+              <h3>Function Permissions</h3>
+              <div className="form-group">
+                <label>Function Selector:</label>
+                <input
+                  type="text"
+                  placeholder="0x12345678"
+                  value={functionToggleData.functionSelector}
+                  onChange={(e) => setFunctionToggleData({ ...functionToggleData, functionSelector: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>Allowed:</label>
+                <input type="checkbox" checked={functionToggleData.allowed} onChange={(e) => setFunctionToggleData({ ...functionToggleData, allowed: e.target.checked })} />
+              </div>
+              <button onClick={toggleFunction} className="action-button toggle-btn" disabled={loading}>
+                {loading ? "Processing..." : "Toggle Function"}
+              </button>
+            </div>
+
+            <div className="management-section">
+              <h3>Manage Assets</h3>
+              <div className="asset-management-buttons">
+                <button onClick={retrieveUSDT} className="action-button retrieve-btn" disabled={loading}>
+                  {loading ? "Processing..." : "Retrieve USDT"}
+                </button>
+                <button onClick={retrieveBNB} className="action-button retrieve-btn" disabled={loading}>
+                  {loading ? "Processing..." : "Retrieve BNB"}
+                </button>
+                <button onClick={depositUSDT} className="action-button deposit-btn" disabled={loading}>
+                  {loading ? "Processing..." : "Deposit USDT"}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -242,7 +317,7 @@ const ArbitrageUI = ({
         {!account && (
           <div className="not-connected">
             <h2>Connect your wallet to use the Arbitrage Trial system</h2>
-            <p>This application requires a web3 wallet like MetaMask to interact with the Sepolia Testnet.</p>
+            <p>This application requires a web3 wallet like MetaMask to interact with the BSC Mainnet.</p>
             <button onClick={connectWallet} disabled={loading} className="connect-btn large">
               {loading ? "Connecting..." : "Connect Wallet"}
             </button>
@@ -252,9 +327,9 @@ const ArbitrageUI = ({
 
       {/* Footer */}
       <div className="arbitrage-footer">
-        <p>© 2025 Secure Arbitrage Trial | Running on Sepolia Testnet</p>
+        <p>© 2025 Secure Arbitrage Trial | Running on BSC Mainnet</p>
         <div className="disclaimer">
-          <p>This is a testnet application. Do not use real funds. All transactions are for demonstration purposes only.</p>
+          <p>All transactions involve real funds. Please use caution when interacting with smart contracts.</p>
         </div>
       </div>
     </div>
