@@ -131,6 +131,43 @@ const MultiChainPriceFeed = () => {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [arbitrageOpportunities, setArbitrageOpportunities] = useState([]);
+  const [minProfitThreshold, setMinProfitThreshold] = useState(0.1); // Minimum profit in USD to show opportunity
+  const [tradeAmount, setTradeAmount] = useState(1); // BNB amount to trade
+
+  const calculateArbitrageOpportunities = (prices) => {
+    const opportunities = [];
+    const validChains = chains.filter((chain) => prices[chain.id] && prices[chain.id].status === "success" && prices[chain.id].price);
+
+    for (let i = 0; i < validChains.length; i++) {
+      for (let j = 0; j < validChains.length; j++) {
+        if (i !== j) {
+          const buyChain = validChains[i];
+          const sellChain = validChains[j];
+
+          const buyPrice = parseFloat(prices[buyChain.id].price);
+          const sellPrice = parseFloat(prices[sellChain.id].price);
+
+          // Calculate potential profit (ignoring gas fees and other costs)
+          const profit = (sellPrice - buyPrice) * tradeAmount;
+
+          if (profit > minProfitThreshold) {
+            opportunities.push({
+              buyChain,
+              sellChain,
+              buyPrice,
+              sellPrice,
+              profit,
+              profitPercentage: (profit / buyPrice) * 100,
+            });
+          }
+        }
+      }
+    }
+
+    // Sort by profit (highest first)
+    return opportunities.sort((a, b) => b.profit - a.profit);
+  };
 
   const fetchPrices = async () => {
     setRefreshing(true);
@@ -168,6 +205,11 @@ const MultiChainPriceFeed = () => {
 
     setPriceData(newPriceData);
     setLastUpdated(new Date().toLocaleTimeString());
+
+    // Calculate arbitrage opportunities
+    const opportunities = calculateArbitrageOpportunities(newPriceData);
+    setArbitrageOpportunities(opportunities);
+
     setLoading(false);
     setRefreshing(false);
   };
@@ -176,7 +218,7 @@ const MultiChainPriceFeed = () => {
     fetchPrices();
     const interval = setInterval(fetchPrices, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [tradeAmount, minProfitThreshold]);
 
   return (
     <div className="multi-chain-price-feed">
@@ -190,13 +232,23 @@ const MultiChainPriceFeed = () => {
         </div>
       </div>
 
+      <div className="settings-panel">
+        <div className="setting-control">
+          <label htmlFor="trade-amount">Trade Amount (BNB):</label>
+          <input id="trade-amount" type="number" min="0.1" step="0.1" value={tradeAmount} onChange={(e) => setTradeAmount(parseFloat(e.target.value))} />
+        </div>
+        <div className="setting-control">
+          <label htmlFor="profit-threshold">Min Profit Threshold ($):</label>
+          <input id="profit-threshold" type="number" min="0" step="0.05" value={minProfitThreshold} onChange={(e) => setMinProfitThreshold(parseFloat(e.target.value))} />
+        </div>
+      </div>
+
       <div className="price-table-container">
         <table className="price-table">
           <thead>
             <tr>
               <th>Chain</th>
               <th>Price</th>
-              {/* <th>Last Updated</th> */}
               <th>Status</th>
             </tr>
           </thead>
@@ -213,11 +265,10 @@ const MultiChainPriceFeed = () => {
                 return (
                   <tr key={chain.id} className={data.status}>
                     <td className="network-cell">
-                      <span className="chain-icon">{chain.icon}</span>
+                      {/* <span className="chain-icon">{chain.icon}</span> */}
                       {chain.name}
                     </td>
                     <td className="price-cell">{data.price ? `$${data.price}` : "—"}</td>
-                    {/* <td>{data.lastUpdate || "—"}</td> */}
                     <td className="status-cell">{data.status === "success" ? <span className="status-badge success">Online</span> : <span className="status-badge error">Error</span>}</td>
                   </tr>
                 );
@@ -225,6 +276,39 @@ const MultiChainPriceFeed = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="arbitrage-opportunities">
+        <h2>Arbitrage Opportunities</h2>
+        {arbitrageOpportunities.length > 0 ? (
+          <div className="opportunities-list">
+            {arbitrageOpportunities.map((opportunity, index) => (
+              <div key={index} className="opportunity-card">
+                <h3>Opportunity #{index + 1}</h3>
+                <p>
+                  Buy BNB on {opportunity.buyChain.name} at ${opportunity.buyPrice} and sell on {opportunity.sellChain.name} for ${opportunity.sellPrice}, earning a profit of $
+                  {opportunity.profit.toFixed(2)} ({opportunity.profitPercentage.toFixed(2)}%).
+                </p>
+                <div className="opportunity-details">
+                  <div className="detail">
+                    <span className="label">Trade Amount:</span>
+                    <span className="value">{tradeAmount} BNB</span>
+                  </div>
+                  <div className="detail">
+                    <span className="label">Buy Total:</span>
+                    <span className="value">${(opportunity.buyPrice * tradeAmount).toFixed(2)}</span>
+                  </div>
+                  <div className="detail">
+                    <span className="label">Sell Total:</span>
+                    <span className="value">${(opportunity.sellPrice * tradeAmount).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="no-opportunities">No profitable arbitrage opportunities found at current prices with the specified threshold.</p>
+        )}
       </div>
     </div>
   );
