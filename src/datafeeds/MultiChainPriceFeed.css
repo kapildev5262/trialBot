@@ -68,6 +68,7 @@
   background-color: #121212;
   border-radius: 8px;
   border: 1px solid #333;
+  align-items: flex-end;
 }
 
 .setting-control {
@@ -89,6 +90,22 @@
   width: 120px;
   background-color: #1a1a1a;
   color: #fff;
+}
+
+/* New apply settings button */
+.apply-settings-button {
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.apply-settings-button:hover {
+  background-color: #2563eb;
 }
 
 .price-table-container {
@@ -215,6 +232,37 @@
   color: #aaa;
 }
 
+/* New colored elements */
+.chain-buy {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.chain-sell {
+  color: #10b981;
+  font-weight: 600;
+}
+
+/* .price-value {
+  color: #f59e0b;
+  font-weight: 600;
+} */
+
+.profit-value {
+  color: #36e139;
+  font-weight: 700;
+}
+
+.profit-percentage {
+  color: #184ec2;
+  font-weight: 600;
+}
+
+.trade-amount-value {
+  color: #ec6e48 !important;
+  font-weight: 600;
+}
+
 .opportunity-details {
   display: flex;
   flex-direction: column;
@@ -285,6 +333,12 @@
   .settings-panel {
     flex-direction: column;
     gap: 10px;
+    align-items: flex-start;
+  }
+
+  .apply-settings-button {
+    margin-top: 10px;
+    width: 100%;
   }
   
   .opportunities-list {

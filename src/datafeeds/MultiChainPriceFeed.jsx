@@ -134,6 +134,8 @@ const MultiChainPriceFeed = () => {
   const [arbitrageOpportunities, setArbitrageOpportunities] = useState([]);
   const [minProfitThreshold, setMinProfitThreshold] = useState(0.1); // Minimum profit in USD to show opportunity
   const [tradeAmount, setTradeAmount] = useState(1); // BNB amount to trade
+  const [tempTradeAmount, setTempTradeAmount] = useState(1); // Temporary state for trade amount input
+  const [tempMinProfitThreshold, setTempMinProfitThreshold] = useState(0.1); // Temporary state for min profit threshold input
 
   const calculateArbitrageOpportunities = (prices) => {
     const opportunities = [];
@@ -220,6 +222,19 @@ const MultiChainPriceFeed = () => {
     return () => clearInterval(interval);
   }, [tradeAmount, minProfitThreshold]);
 
+  // Initialize temp values
+  useEffect(() => {
+    setTempTradeAmount(tradeAmount);
+    setTempMinProfitThreshold(minProfitThreshold);
+  }, [tradeAmount, minProfitThreshold]);
+
+  // Function to apply changes from inputs
+  const applyChanges = () => {
+    setTradeAmount(parseFloat(tempTradeAmount));
+    setMinProfitThreshold(parseFloat(tempMinProfitThreshold));
+    fetchPrices();
+  };
+
   return (
     <div className="multi-chain-price-feed">
       <div className="price-feed-header">
@@ -235,12 +250,32 @@ const MultiChainPriceFeed = () => {
       <div className="settings-panel">
         <div className="setting-control">
           <label htmlFor="trade-amount">Trade Amount (BNB):</label>
-          <input id="trade-amount" type="number" min="0.1" step="0.1" value={tradeAmount} onChange={(e) => setTradeAmount(parseFloat(e.target.value))} />
+          <input 
+            id="trade-amount" 
+            type="number" 
+            min="0.1" 
+            step="0.1" 
+            value={tempTradeAmount} 
+            onChange={(e) => setTempTradeAmount(parseFloat(e.target.value) || 0)} 
+          />
         </div>
         <div className="setting-control">
           <label htmlFor="profit-threshold">Min Profit Threshold ($):</label>
-          <input id="profit-threshold" type="number" min="0" step="0.05" value={minProfitThreshold} onChange={(e) => setMinProfitThreshold(parseFloat(e.target.value))} />
+          <input 
+            id="profit-threshold" 
+            type="number" 
+            min="0" 
+            step="0.05" 
+            value={tempMinProfitThreshold} 
+            onChange={(e) => setTempMinProfitThreshold(parseFloat(e.target.value) || 0)} 
+          />
         </div>
+        <button 
+          className="apply-settings-button" 
+          onClick={applyChanges}
+        >
+          Apply Settings
+        </button>
       </div>
 
       <div className="price-table-container">
@@ -265,7 +300,7 @@ const MultiChainPriceFeed = () => {
                 return (
                   <tr key={chain.id} className={data.status}>
                     <td className="network-cell">
-                      {/* <span className="chain-icon">{chain.icon}</span> */}
+                      <span className="chain-icon">{chain.icon}</span>
                       {chain.name}
                     </td>
                     <td className="price-cell">{data.price ? `$${data.price}` : "—"}</td>
@@ -286,13 +321,12 @@ const MultiChainPriceFeed = () => {
               <div key={index} className="opportunity-card">
                 <h3>Opportunity #{index + 1}</h3>
                 <p>
-                  Buy BNB on {opportunity.buyChain.name} at ${opportunity.buyPrice} and sell on {opportunity.sellChain.name} for ${opportunity.sellPrice}, earning a profit of $
-                  {opportunity.profit.toFixed(2)} ({opportunity.profitPercentage.toFixed(2)}%).
+                  Buy BNB on <span className="chain-buy">{opportunity.buyChain.name}</span> at <span className="price-value">${(opportunity.buyPrice * tradeAmount).toFixed(2)}</span> and sell on <span className="chain-sell">{opportunity.sellChain.name}</span> for <span className="price-value">${(opportunity.sellPrice * tradeAmount).toFixed(2)}</span>, earning a profit of <span className="profit-value">${opportunity.profit.toFixed(2)}</span> (<span className="profit-percentage">{opportunity.profitPercentage.toFixed(2)}%</span>).
                 </p>
                 <div className="opportunity-details">
                   <div className="detail">
                     <span className="label">Trade Amount:</span>
-                    <span className="value">{tradeAmount} BNB</span>
+                    <span className="value trade-amount-value">{tradeAmount} BNB</span>
                   </div>
                   <div className="detail">
                     <span className="label">Buy Total:</span>
