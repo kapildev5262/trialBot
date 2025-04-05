@@ -1,0 +1,141 @@
+.uniswap-quote-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+  
+  .uniswap-quote-container h2 {
+    color: #1a1a1a;
+    text-align: center;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+  
+  .input-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .input-group label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #4b5563;
+  }
+  
+  .input-group select,
+  .input-group input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 16px;
+    background-color: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .input-group select:focus,
+  .input-group input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  }
+  
+  .input-group select option:disabled {
+    color: #9ca3af;
+    background-color: #f3f4f6;
+  }
+  
+  .swap-button {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #d1d5db;
+    padding: 8px;
+    border-radius: 8px;
+    margin: 8px 0;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    display: block;
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .swap-button:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .quote-button {
+    background-color: #6366f1;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    margin-top: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    transition: background-color 0.2s;
+    width: 100%;
+  }
+  
+  .quote-button:hover {
+    background-color: #4f46e5;
+  }
+  
+  .quote-button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+  }
+  
+  .quote-result {
+    margin-top: 24px;
+    padding: 16px;
+    background-color: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+  }
+  
+  .quote-result h3 {
+    color: #0369a1;
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  
+  .quote-details {
+    font-size: 15px;
+  }
+  
+  .quote-details p {
+    margin: 8px 0;
+    color: #1e293b;
+  }
+  
+  .error-message {
+    margin-top: 16px;
+    padding: 12px;
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #b91c1c;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    .uniswap-quote-container {
+      padding: 16px;
+      border-radius: 8px;
+    }
+    
+    .input-group select,
+    .input-group input,
+    .quote-button {
+      padding: 10px;
+      font-size: 14px;
+    }
+  }
